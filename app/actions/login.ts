@@ -1,6 +1,6 @@
 "use server"
 
-import { LoginSchema } from "./login.schema";
+import { LoginSchema } from "../schemas/login.schema";
 import { z } from "zod"
 
 export type LoginError = {

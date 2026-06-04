@@ -2,7 +2,7 @@
 
 import { Button } from "@/app/components/button";
 import { Input } from "@/app/components/input";
-import { LoginError } from "@/app/schemas/actions/login";
+import { LoginError } from "@/app/actions/login";
 import Link from "next/link";
 import { useActionState, useEffect } from "react"
 import toast from "react-hot-toast";
