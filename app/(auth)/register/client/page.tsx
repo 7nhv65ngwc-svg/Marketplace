@@ -1,6 +1,6 @@
 "use client"
 
-import { custumerRegisterStep02, custumerRegisterStep03, CustumerRegistrationStep01Error, CustumerRegistrationStep02Error, CustumerRegistrationStep03Error, validateEmail } from "@/app/actions/register_client";
+import { custumerRegister, custumerRegisterStep02, custumerRegisterStep03, custumerRegisterStep04, CustumerRegistrationStep01Error, CustumerRegistrationStep02Error, CustumerRegistrationStep03Error, validateEmail } from "@/app/actions/register_client";
 import { Button } from "@/app/components/button";
 import { Input } from "@/app/components/input";
 import { Select } from "@/app/components/select";
@@ -8,10 +8,13 @@ import { ECustomerRegistrationSteps, TCustomerRegister } from "@/app/interfaces/
 import { STATES } from "@/app/mocks/states";
 import { handleBuildComplete } from "next/dist/build/adapter/build-complete";
 import Link from "next/dist/client/link";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, Dispatch, SetStateAction, SubmitEvent, use, useActionState, useEffect, useState } from "react"
 import toast from "react-hot-toast";
+import { number } from "zod";
 
 interface IProps {
+    client: Partial<TCustomerRegister>,
     setClient: Dispatch<SetStateAction<Partial<TCustomerRegister>>>
     setStep: Dispatch<SetStateAction<ECustomerRegistrationSteps>>
 
@@ -35,7 +38,7 @@ function Step01({ setStep, setClient }: IProps) {
             }
 
             toast.error(message)
-        } else {
+        } else if(state.success) {
             setClient(prev => ({
                 ...prev,
                 email: email
@@ -115,6 +118,7 @@ const initialStateStep03: FormState<CustumerRegistrationStep03Error> = { success
 
 
 function Step03({ setStep, setClient }: IProps) {
+
     const [formState, formAction, isPeding] = useActionState(custumerRegisterStep03, initialStateStep03)
 
     const [loading, setLoanding] = useState<boolean>(false)
@@ -244,6 +248,116 @@ function Step03({ setStep, setClient }: IProps) {
     )
 }
 
+function Step04({ setStep, setClient, client }: IProps) {
+    const [state, formAction, isPending] = useActionState(custumerRegisterStep04, initialStateStep01)
+    const [password, setPassword] = useState<string>(client?.password || "")
+    const [confPassword, setConfPassword] = useState<string>(client?.password || "")
+
+    useEffect(() => {
+        if (!state.success && (password !== "" && confPassword !== "")) {
+            let message: string = "Ocorreu um erro desconhecido"
+
+            if (state.errors) {
+                if (state.errors.password) message = state.errors.password[0]
+                if (state.errors.confPassword) message = state.errors.confPassword[0]
+            } else if (state.message) {
+                message = state.message
+            }
+
+            toast.error(message)
+        } else if (state.success) {
+            setClient(prev => ({
+                ...prev,
+                password
+            }))
+            setStep(ECustomerRegistrationSteps.OVERVIEW)
+        }
+    }, [state])
+
+    return (
+        <form action={formAction} className="flex flex-col gap-2 mt-2">
+            <Input value={password} onChange={e => setPassword(e.currentTarget.value)} id="password" name="password" type="password" label="Senha" required />
+            <Input value={confPassword} onChange={e => setConfPassword(e.currentTarget.value)} id="confPassword" name="confPassword" type="password" label="Confirmar Senha" required />
+            <div className="flex flex-row gap-2 items-center">
+                <Button type="button" onClick={() => setStep(ECustomerRegistrationSteps.STEP03)} >Voltar</Button>
+                <Button type="submit" disabled={isPending}>{isPending ? "Carregando" : "Avançar"}</Button>
+            </div>
+        </form>
+    )
+}
+
+function Overview({ setStep, client }: Omit<IProps, "setClient">) {
+    const router = useRouter()
+    const [state, formAction, isPending] = useActionState(custumerRegister, { success: false })
+    const address = client.address ? client.address[0] : undefined
+
+    useEffect(() => {
+        if (!state.success && state.errors) {
+            const errors = Object.values(state.errors)
+            const message = errors.flat()
+            toast.error(message ? message[0] : state.message || "Ocorreu um erro desconhecido")
+
+        } else if (state.success) {
+            toast.success(state.message || "Cadastro realizado com sucesso!")
+            setTimeout(() => router.push("/login"), 2000)
+        }
+    }, [state])
+
+
+    return (
+        <form action={formAction} className="grid grid-cols-4 gap-2 mt-2">
+            <div className="col-span-4">
+                <Input id="name" name="name" label="Nome Completo" value={client.name} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-2">
+                <Input id="email" name="email" label="E-mail" value={client.email} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-2">
+                <Input id="document" name="document" label="CPF" value={client.document} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-2">
+                <Input id="dateOfBirth" name="dateOfBirt" label="Data de Nascimento" type="date" value={client.dateofbirth?.toDateString()} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-2">
+                <Input id="telefone" name="phone" label="Telefone" value={client.phone} readOnly onChange={() => { }} />
+            </div>
+            <Input id="zipcode" name="zipcode" label="CEP" value={address?.zipcode} readOnly onChange={() => { }} />
+            <div className="col-span-2">
+                <Input id="publicPlace" name="publicPlace" label="Endereço" value={address?.publicPlace} readOnly onChange={() => { }} />
+            </div>
+            <Input id="number" label="number" value={address?.number} readOnly onChange={() => { }} />
+            <div className="col-span-2">
+                <Input id="complement" name="complement" label="Complemento" value={address?.complement} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-2">
+                <Input id="neighborhood" name="neighborhood" label="Bairro" value={address?.neighborhood} readOnly onChange={() => { }} />
+            </div>
+            <div className="col-span-3">
+                <Input id="city" name="city" label="Cidade" value={address?.city} readOnly onChange={() => { }} />
+            </div>
+            <Input id="state" name="state" label="UF" value={address?.state} readOnly onChange={() => { }} />
+            <div className="col-span-4">
+                <Input id="password" name="password"
+                    type="password"
+                    label="Senha"
+                    value={client.password}
+                    disabled
+                    onChange={() => { }}
+                />
+                <Input id="confPassword" name="confPassword"
+                    type="hidden"
+                    value={client.password}
+                    readOnly
+                    onChange={() => { }}
+                />
+            </div>
+            <div className="col-span-4 flex flex-row gap-2 items-center">
+                <Button type="button" onClick={() => setStep(ECustomerRegistrationSteps.STEP04)}>Voltar</Button>
+                <Button type="submit">Cadastrar</Button>
+            </div>
+        </form>
+    )
+}
 
 export default function Page() {
     const [step, setStep] = useState<ECustomerRegistrationSteps>(ECustomerRegistrationSteps.STEP01)
@@ -252,17 +366,19 @@ export default function Page() {
     const render = () => {
         switch (step) {
             case ECustomerRegistrationSteps.STEP01:
-                return <Step01 setClient={setClient} setStep={setStep} />
+                return <Step01 client={client} setClient={setClient} setStep={setStep} />
             case ECustomerRegistrationSteps.STEP02:
-                return <Step02 setClient={setClient} setStep={setStep} />
+                return <Step02 client={client} setClient={setClient} setStep={setStep} />
             case ECustomerRegistrationSteps.STEP03:
-                return <Step03 setClient={setClient} setStep={setStep} />
+                return <Step03 client={client} setClient={setClient} setStep={setStep} />
             case ECustomerRegistrationSteps.STEP04:
+                return <Step04 client={client} setClient={setClient} setStep={setStep} />
             case ECustomerRegistrationSteps.OVERVIEW:
-
+                return <Overview client={client} setStep={setStep} />
         }
-
     }
+
+    useEffect(() => console.log(client), [client])
 
     return (
         <>
@@ -277,7 +393,7 @@ export default function Page() {
                 </ul>
             </div>
             {render()}
-            <p className="mt-4 text-sm font-light">Já possui uma conta? <Link href={"/register"} className="text-[#1C4694] font-semibold"></Link>Entrar</p>
+            <p className="mt-4 text-sm font-light">Já possui uma conta? <Link href={"/login"} className="text-[#1C4694] font-semibold">Entrar</Link></p>
         </>
     )
 }
