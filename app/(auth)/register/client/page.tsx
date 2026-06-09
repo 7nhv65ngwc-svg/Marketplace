@@ -38,7 +38,7 @@ function Step01({ setStep, setClient }: IProps) {
             }
 
             toast.error(message)
-        } else if(state.success) {
+        } else if (state.success) {
             setClient(prev => ({
                 ...prev,
                 email: email
@@ -104,7 +104,7 @@ function Step02({ setStep, setClient }: IProps) {
         <form action={formAction} className="flex flex-col gap-2 mt-2">
             <Input id="name" name="name" value={name} onChange={e => setName(e.currentTarget.value)} required label="Nome Completo" maxLength={150} />
             <Input id="document" name="document" value={document} onChange={e => setDocument(e.currentTarget.value)} required label="CPF" max={11} />
-            <Input id="dateOfBirth" name="dateOfBirth" value={dateOfBirth} onChange={e => setDateOfBirth(e.currentTarget.value)} type="Data" label="Data de Nascimento" />
+            <Input id="dateOfBirth" name="dateOfBirth" value={dateOfBirth} onChange={e => setDateOfBirth(e.currentTarget.value)} type="date" label="Data de Nascimento" />
             <Input id="phone" name="phone" value={phone} onChange={e => setPhone(e.currentTarget.value)} type="tel" required label="Telefone" />
             <div className="flex flex-row items-center gap-2">
                 <Button type="button" onClick={() => setStep(ECustomerRegistrationSteps.STEP01)}>Voltar</Button>
