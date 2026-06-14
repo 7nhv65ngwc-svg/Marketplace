@@ -1,0 +1,12 @@
+export const CATEGORIES: Array<ICategory> = [
+    { id: 1, name: "Notebooks", path: "/notebooks", highlights: true },
+    { id: 2, name: "Desktops", path: "/desktops", highlights: false },
+    { id: 3, name: "Periféricos", path: "/perifericos", highlights: true },
+    { id: 4, name: "Componentes", path: "/componentes", highlights: false },
+    { id: 5, name: "Monitores", path: "/monitores", highlights: true },
+    { id: 6, name: "Armazenamento", path: "/armazenamento", highlights: false },
+    { id: 7, name: "Redes", path: "/redes", highlights: true },
+    { id: 8, name: "Impressoras", path: "/impressoras", highlights: false },
+    { id: 9, name: "Software", path: "/software", highlights: true },
+    { id: 10, name: "Acessórios", path: "/acessorios", highlights: false }
+];

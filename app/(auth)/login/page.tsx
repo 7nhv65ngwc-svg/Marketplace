@@ -49,3 +49,7 @@ export default function Page() {
 
 
 }
+
+function login(state: FormState<LoginError>): FormState<LoginError> | Promise<FormState<LoginError>> {
+    throw new Error("Function not implemented.");
+}
